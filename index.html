@@ -1021,15 +1021,15 @@
       ctx.shadowBlur = 0;
     }
 
-    // Invuln blink
-    if (s.invuln > 0 && (Math.floor(s.invuln * 10) % 2 === 0)) {
-      ctx.globalAlpha = 0.5;
+    // Invuln blink (only during respawn window, not on menu)
+    if (s.invuln > 0 && s.invuln < 5 && (Math.floor(s.invuln * 10) % 2 === 0)) {
+      ctx.globalAlpha = 0.55;
     }
 
     // Body
     ctx.strokeStyle = '#6ff';
-    ctx.fillStyle = 'rgba(5, 20, 40, 0.9)';
-    ctx.lineWidth = 2;
+    ctx.fillStyle = 'rgba(20, 60, 120, 0.95)';
+    ctx.lineWidth = 2.5;
     ctx.lineJoin = 'round';
     ctx.shadowBlur = 10; ctx.shadowColor = '#6ff';
     ctx.beginPath();
@@ -1269,16 +1269,36 @@
   //  Main loop
   // ====================================================================
   var lastT = 0;
+  var errReported = false;
+  function showError(msg) {
+    if (errReported) return;
+    errReported = true;
+    try {
+      ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+      ctx.fillStyle = '#300'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#f66'; ctx.font = 'bold 14px monospace';
+      ctx.textAlign = 'left';
+      var lines = String(msg).split('\n').slice(0, 10);
+      for (var i = 0; i < lines.length; i++) ctx.fillText(lines[i], 24, 40 + i * 20);
+    } catch (e) {}
+    console.error('[asteroids error]', msg);
+  }
+  window.addEventListener('error', function (e) { showError(e.message + '\n' + (e.filename || '') + ':' + (e.lineno || '')); });
+
   function frame(ts) {
     var now = ts / 1000;
     var dt = Math.min(0.05, lastT ? now - lastT : 0.016);
     lastT = now;
 
-    update(dt);
-    render();
+    try { update(dt); } catch (e) { showError('UPDATE: ' + e.message); }
+    try { render(); } catch (e) { showError('RENDER: ' + e.message); }
 
     requestAnimationFrame(frame);
   }
+
+  // Spawn a ship at init so the canvas always has something visible
+  ship = makeShip(W / 2, H / 2);
+  ship.invuln = 999; // keep it visible but immortal on menu
 
   openDialog(menuDlg);
   updateHud();
