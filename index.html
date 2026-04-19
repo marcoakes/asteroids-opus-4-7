@@ -122,7 +122,7 @@
   var SHIP = { r: 14, rotSpeed: 4.8, thrust: 260, maxSpeed: 380, friction: 0.35, fireCd: 0.22, bulletSpeed: 620, bulletLife: 0.95 };
 
   function makeShip(x, y) {
-    return { x: x, y: y, vx: 0, vy: 0, angle: -Math.PI / 2, alive: true, invuln: 2.5, thrusting: false, fireCd: 0, warpCd: 0 };
+    return { x: x, y: y, vx: 0, vy: 0, angle: -Math.PI / 2, r: SHIP.r, alive: true, invuln: 2.5, thrusting: false, fireCd: 0, warpCd: 0 };
   }
 
   function makeRock(size, x, y, vx, vy) {
